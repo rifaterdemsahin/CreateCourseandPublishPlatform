@@ -5,12 +5,12 @@ FROM node:22-alpine
 
 WORKDIR /app
 
-# Copy package files and install dependencies
-COPY package.json ./
+# Copy package files from 5_Symbols and install dependencies
+COPY 5_Symbols/package.json ./
 RUN npm install --production
 
-# Copy application files
-COPY . .
+# Copy all application files from 5_Symbols
+COPY 5_Symbols/ .
 
 # Expose port
 EXPOSE 3000

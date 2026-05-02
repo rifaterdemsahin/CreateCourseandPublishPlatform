@@ -1,15 +1,12 @@
 {
-  "name": "ai-no-code-course-platform",
+  "name": "ai-no-code-course-platform-root",
   "version": "1.0.0",
-  "description": "AI No-Code Course Platform with Claude AI Tutor",
-  "main": "server.js",
+  "description": "AI No-Code Course Platform — Delivery Pilot Framework",
+  "private": true,
   "scripts": {
-    "start": "node server.js",
-    "dev": "doppler run -- node server.js"
-  },
-  "dependencies": {
-    "express": "^4.19.2",
-    "cors": "^2.8.5"
+    "postinstall": "cd 5_Symbols && npm install",
+    "start": "cd 5_Symbols && npm start",
+    "dev": "cd 5_Symbols && npm run dev"
   },
   "engines": {
     "node": ">=20.0.0"
