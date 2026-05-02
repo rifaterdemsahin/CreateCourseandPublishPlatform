@@ -80,6 +80,49 @@
         </main>
     </div>
 
+    <!-- AI Tutor Chat Widget -->
+    <div class="chat-widget" id="chat-widget">
+        <button class="chat-toggle" id="chat-toggle" aria-label="Open AI Tutor">
+            <i class="fa-solid fa-robot"></i>
+            <span class="chat-toggle-tooltip">AI Tutor</span>
+        </button>
+        <div class="chat-panel" id="chat-panel">
+            <div class="chat-header">
+                <div class="chat-header-info">
+                    <i class="fa-solid fa-robot"></i>
+                    <div>
+                        <h3>AI Tutor</h3>
+                        <span class="chat-status"><span class="status-dot"></span> Online</span>
+                    </div>
+                </div>
+                <button class="chat-close" id="chat-close" aria-label="Close chat">
+                    <i class="fa-solid fa-times"></i>
+                </button>
+            </div>
+            <div class="chat-messages" id="chat-messages">
+                <div class="chat-message bot">
+                    <div class="chat-avatar"><i class="fa-solid fa-robot"></i></div>
+                    <div class="chat-bubble">
+                        <p>Hello! I'm your AI Tutor for the <strong>AI No-Code</strong> course. Ask me anything about the lessons, the Delivery Pilot framework, or how to build your own AI solutions!</p>
+                    </div>
+                </div>
+            </div>
+            <div class="chat-input-area">
+                <div class="chat-input-wrapper">
+                    <input
+                        type="text"
+                        id="chat-input"
+                        placeholder="Ask your AI Tutor..."
+                        autocomplete="off"
+                    />
+                    <button id="chat-send" aria-label="Send message">
+                        <i class="fa-solid fa-paper-plane"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="script.js"></script>
 </body>
 </html>
