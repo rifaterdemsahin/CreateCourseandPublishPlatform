@@ -384,6 +384,144 @@ function init() {
             updateNavigation();
         }
     }
+
+    // Initialize chat
+    initChat();
+}
+
+// ============================================
+// AI TUTOR CHAT
+// ============================================
+
+let chatOpen = false;
+let chatMessages = [];
+let isTyping = false;
+
+function initChat() {
+    const chatToggle = document.getElementById('chat-toggle');
+    const chatClose = document.getElementById('chat-close');
+    const chatSend = document.getElementById('chat-send');
+    const chatInput = document.getElementById('chat-input');
+
+    if (chatToggle) chatToggle.addEventListener('click', toggleChat);
+    if (chatClose) chatClose.addEventListener('click', closeChat);
+    if (chatSend) chatSend.addEventListener('click', sendChatMessage);
+    if (chatInput) {
+        chatInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendChatMessage();
+        });
+    }
+}
+
+function toggleChat() {
+    chatOpen = !chatOpen;
+    const panel = document.getElementById('chat-panel');
+    if (panel) panel.classList.toggle('open', chatOpen);
+}
+
+function closeChat() {
+    chatOpen = false;
+    const panel = document.getElementById('chat-panel');
+    if (panel) panel.classList.remove('open');
+}
+
+function appendMessage(role, text) {
+    const container = document.getElementById('chat-messages');
+    if (!container) return;
+
+    const messageEl = document.createElement('div');
+    messageEl.className = `chat-message ${role}`;
+    messageEl.innerHTML = `
+        <div class="chat-avatar"><i class="fa-solid ${role === 'user' ? 'fa-user' : 'fa-robot'}"></i></div>
+        <div class="chat-bubble"><p>${escapeHtml(text)}</p></div>
+    `;
+    container.appendChild(messageEl);
+    container.scrollTop = container.scrollHeight;
+}
+
+function showTypingIndicator() {
+    const container = document.getElementById('chat-messages');
+    if (!container) return;
+
+    const typingEl = document.createElement('div');
+    typingEl.className = 'chat-message bot';
+    typingEl.id = 'typing-indicator';
+    typingEl.innerHTML = `
+        <div class="chat-avatar"><i class="fa-solid fa-robot"></i></div>
+        <div class="chat-typing">
+            <span></span><span></span><span></span>
+        </div>
+    `;
+    container.appendChild(typingEl);
+    container.scrollTop = container.scrollHeight;
+}
+
+function hideTypingIndicator() {
+    const indicator = document.getElementById('typing-indicator');
+    if (indicator) indicator.remove();
+}
+
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+async function sendChatMessage() {
+    const input = document.getElementById('chat-input');
+    const sendBtn = document.getElementById('chat-send');
+    const text = input.value.trim();
+
+    if (!text || isTyping) return;
+
+    // Add user message
+    appendMessage('user', text);
+    chatMessages.push({ role: 'user', content: text });
+    input.value = '';
+
+    // Show typing indicator
+    isTyping = true;
+    if (sendBtn) sendBtn.disabled = true;
+    showTypingIndicator();
+
+    try {
+        // Build context-aware system prompt
+        const currentLesson = currentLessonId ? getLessonById(currentLessonId) : null;
+        let systemPrompt = 'You are a helpful AI tutor for the AI No-Code course. Help students understand concepts, answer questions about the course content, and guide them through building AI solutions without coding. Be encouraging and practical.';
+        if (currentLesson) {
+            systemPrompt += ` The student is currently viewing the lesson: "${currentLesson.title}". Use this context to provide relevant help.`;
+        }
+
+        const response = await fetch('/api/chat', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                system: systemPrompt,
+                messages: chatMessages.map(m => ({ role: m.role, content: m.content }))
+            })
+        });
+
+        hideTypingIndicator();
+
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(errorData.error || `HTTP ${response.status}`);
+        }
+
+        const data = await response.json();
+        const botText = data.content?.[0]?.text || data.completion || 'Sorry, I had trouble understanding that. Please try again.';
+
+        appendMessage('bot', botText);
+        chatMessages.push({ role: 'assistant', content: botText });
+    } catch (error) {
+        hideTypingIndicator();
+        console.error('Chat error:', error);
+        appendMessage('bot', 'Sorry, I\'m having trouble connecting right now. Please try again in a moment.');
+    } finally {
+        isTyping = false;
+        if (sendBtn) sendBtn.disabled = false;
+        input.focus();
+    }
 }
 
 // Run when DOM is ready
